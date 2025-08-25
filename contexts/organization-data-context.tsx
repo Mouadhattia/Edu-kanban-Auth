@@ -56,9 +56,9 @@ export function OrganizationDataProvider({
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const user = await loginAPI({ email, password });
-      localStorage.setItem("token", user.token);
-      setUser(user);
+      const res = await loginAPI({ email, password });
+      localStorage.setItem("token", res.token);
+      setUser(res.user);
       setError(null);
     } catch (err) {
       setError(err as Error);

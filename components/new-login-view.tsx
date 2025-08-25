@@ -30,63 +30,35 @@ import { useOrganizationData } from "@/contexts/organization-data-context";
 export function NewLoginView() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [role, setRole] = useState<UserRole>("teacher");
   const router = useRouter();
-  const { error, loading, googleLogin, login } = useOrganizationData();
+  const { error, loading, googleLogin, login, user } = useOrganizationData();
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    loginWithRole(role, email || "demo@edukanban.com");
-  };
-
-  const loginWithRole = (selectedRole: UserRole, userEmail: string) => {
-    // In a real app, you would authenticate the user here
-    // For demo purposes, we'll just set a cookie and redirect
-    document.cookie = `user-role=${selectedRole}; path=/`;
-
-    // Also store in localStorage for components that need this info
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user-role", selectedRole);
-      localStorage.setItem("user-email", userEmail);
-
-      // Set a default name based on role
-      if (selectedRole === "teacher") {
-        localStorage.setItem("user-name", "Dr. Smith");
-      } else if (selectedRole === "student") {
-        localStorage.setItem("user-name", "Alex Johnson");
-      } else if (selectedRole === "admin") {
-        localStorage.setItem("user-name", "Admin User");
-      } else if (selectedRole === "curriculum-designer") {
-        localStorage.setItem("user-name", "Jane Cooper");
-      } else if (selectedRole === "org-admin") {
-        localStorage.setItem("user-name", "Michael Johnson");
-      } else if (selectedRole === "super-admin") {
-        localStorage.setItem("user-name", "Super Admin");
-      }
-    }
-
-    console.log("Logging in as:", selectedRole);
-
-    // Redirect to the appropriate dashboard based on role
-    if (selectedRole === "super-admin") {
-      router.push("/super-admin");
-    } else if (selectedRole === "admin") {
-      router.push("/admin/dashboard"); // Redirect admin to the admin dashboard with sidebar
-    } else if (selectedRole === "org-admin") {
-      router.push("/organization/dashboard"); // Ensure org-admin goes to the organization dashboard
-    } else if (selectedRole === "student") {
-      router.push("/student/dashboard");
-    } else if (selectedRole === "curriculum-designer") {
-      router.push("/curriculum-designer/dashboard");
-    } else {
-      router.push("/dashboard");
-    }
-  };
-
-  const handleQuickDemo = () => {
-    // Pre-fill credentials for quick demo
-    setEmail("demo@edukanban.com");
-    setPassword("demo123");
-    loginWithRole(role, "demo@edukanban.com");
+    login(email, password)
+      .then(() => {
+        console.log(user);
+        if (user) {
+          // Redirect based on role
+          if (user.role === "superAdmin") {
+            router.push("/super-admin");
+          } else if (user.role === "school-admin") {
+            router.push("/school/admin/dashboard");
+          } else if (user.role === "organization-admin") {
+            router.push("/organization/dashboard");
+          } else if (user.role === "student") {
+            router.push("/student/dashboard");
+          } else if (user.role === "curriculum-designer") {
+            router.push("/curriculum-designer/dashboard");
+          } else if (user.role === "teacher") {
+            router.push("/dashboard");
+          }
+        }
+      })
+      .catch(() => {
+        console.error("Login failed", error);
+      });
   };
 
   const handleSocialLogin = (
@@ -188,7 +160,7 @@ export function NewLoginView() {
             </div>
 
             {/* Demo Mode role selector */}
-            <div className="space-y-2 pt-2 border-t">
+            {/* <div className="space-y-2 pt-2 border-t">
               <Label htmlFor="role">Demo Mode: Select Role</Label>
               <Select
                 value={role}
@@ -220,7 +192,7 @@ export function NewLoginView() {
                 Click "Quick Demo Login" to instantly access the selected role's
                 dashboard.
               </p>
-            </div>
+            </div> */}
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full">

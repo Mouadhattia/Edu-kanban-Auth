@@ -58,11 +58,16 @@ export async function register(payload: RegisterPayload): Promise<User> {
   });
 }
 
-export async function login(payload: LoginPayload): Promise<User> {
-  return apiRequest<User>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+export async function login(
+  payload: LoginPayload
+): Promise<{ user: User; token: string; message: string }> {
+  return apiRequest<{ user: User; token: string; message: string }>(
+    "/auth/login",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
 }
 
 export async function googleLogin(payload: GoogleLoginPayload): Promise<User> {
